@@ -68,20 +68,23 @@ def calculate_times(data: CycleData):
 
             # Ajusta a quantidade de carros no horário de pico (aplica peso maior)
             quantity = signal.quantity * (1.5 if is_peak else 1.0)
-            normalized_demand = quantity / signal.rate
+            normalized_demand = quantity * signal.rate  # Agora a taxa de fluxo aumenta a demanda
             normalized_demands.append(normalized_demand)
 
         # Soma total da demanda normalizada
         total_normalized_demand = sum(normalized_demands)
 
-        # Calcula o tempo de cada sinal
-        signal_times = [
-            {
+        # Calcula o tempo de cada sinal e aplica a lógica do tempo mínimo de 15 segundos
+        signal_times = []
+        for signal, demand in zip(data.signals, normalized_demands):
+            time = round((demand / total_normalized_demand) * data.total_cycle_time, 2)
+            # Se o tempo calculado for menor que 15 segundos, ajustamos para 15 segundos
+            if time < 15:
+                time = 15
+            signal_times.append({
                 "signal_id": signal.signal_id,
-                "time": round((demand / total_normalized_demand) * data.total_cycle_time, 2)
-            }
-            for signal, demand in zip(data.signals, normalized_demands)
-        ]
+                "time": time
+            })
 
         return {"total_cycle_time": data.total_cycle_time, "signal_times": signal_times}
     except Exception as e:
