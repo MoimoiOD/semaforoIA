@@ -58,6 +58,9 @@ def calculate_times(data: CycleData):
         # Identifica o horário atual
         current_time = datetime.now().strftime("%H:%M")
 
+        # Fator de aumento para o horário de pico
+        peak_multiplier = 1.5  # Aumentar o tempo de abertura em 50% durante o pico
+
         # Calcula a demanda normalizada para cada sinal
         normalized_demands = []
         for signal in data.signals:
@@ -81,14 +84,24 @@ def calculate_times(data: CycleData):
             # Se o tempo calculado for menor que 15 segundos, ajustamos para 15 segundos
             if time < 15:
                 time = 15
+
+            # Se for horário de pico, aumenta o tempo de abertura
+            is_peak = any(
+                check_time_in_range(current_time, peak_range)
+                for peak_range in peak_hours.get(signal.signal_id, [])
+            )
+            if is_peak:
+                time *= peak_multiplier  # Aumenta o tempo de abertura em 50% no horário de pico
+
             signal_times.append({
                 "signal_id": signal.signal_id,
-                "time": time
+                "time": round(time, 2)  # Arredonda o tempo para 2 casas decimais
             })
 
         return {"total_cycle_time": data.total_cycle_time, "signal_times": signal_times}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao calcular os tempos: {str(e)}")
+
 
 # Função auxiliar para verificar se o horário atual está no intervalo de pico
 def check_time_in_range(current_time: str, peak_range: str) -> bool:
