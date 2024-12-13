@@ -1,0 +1,4 @@
+{"signal_id": 1, "peak_hours": ["07:00-09:00", "17:00-19:00"]}
+{"signal_id": 2, "peak_hours": ["08:00-10:00"]}
+{"signal_id": 3, "peak_hours": ["06:30-08:30", "15:30-18:30"]}
+{"signal_id": 4, "peak_hours": ["07:00-08:00"]}
